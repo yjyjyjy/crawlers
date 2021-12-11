@@ -103,6 +103,7 @@ def report_scam(driver, url):
 driver1 = webdriver.Chrome()
 driver2 = webdriver.Chrome()
 while True:
+    print(datetime.datetime.now())
     target_df = scan_scam(driver1)
     for url in list(target_df.url[target_df.reported == False]):
         report_scam(driver=driver2, url=url)

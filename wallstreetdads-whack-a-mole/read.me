@@ -1,0 +1,41 @@
+1. Python -- If you have python 3 SKIP
+This helper was developed using Python 3.7.6. Compatibility with Python 2 is not guaranteed. You can check your Python version by typing `python --version` in your terminal. If you need to update your Python environment, here is a guide for installing HomeBrew and Python:
+https://python-docs.readthedocs.io/en/latest/starting/install3/osx.html
+
+* 2. Python Packages (selenium and getpass)
+-- If you know how to spin up a virtual environment with python 3 and install selenium and getpass packages, Do it and SKIP
+Selenium is a library that allows you to write code to manipulate a browser, mimicking the behavior of a human. (Not necessary) To know more, here is their documentation: https://selenium-python.readthedocs.io/
+
+(Optional) It's generally a good practice to use a virtual environment whenever working with Python. But unless doing serious production work, I haven't run into issues with package dependencies. So, it's not required here. But, warning has been served.
+
+To install the packages, in terminal, enter `pip install selenium==3.141.0`. Then, enter `pip install getpass`
+
+* 3. Chrome Driver
+This allows the helper to create an automated Chrome instance.
+
+To install Chrome Driver, in your terminal, enter
+
+```
+brew install --cask chromedriver
+```
+
+If you don't have brew installed, check step 1.
+
+If your Mac is on Catalina OS (most likely), there is an additional step you need to follow:
+
+```
+cd /usr/local/bin/
+xattr -d com.apple.quarantine chromedriver
+```
+
+source: https://stackoverflow.com/questions/60362018/macos-catalinav-10-15-3-error-chromedriver-cannot-be-opened-because-the-de
+
+If your Chrome gets updated, you will likely to re-install / update the chromedriver.
+
+```
+brew update-reset
+source ~/.bash_profile
+brew reinstall chromedriver
+cd /usr/local/bin/
+xattr -d com.apple.quarantine chromedriver
+```

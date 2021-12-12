@@ -7,13 +7,14 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import datetime
 import pandas as pd
+import glob
 
 
-def scan_scam(driver):
+def scan_scam(driver, keyword):
     driver.get("https://opensea.io/")
     time.sleep(5)
     searchbox = driver.find_element_by_xpath("//input[@type='search']")
-    searchbox.send_keys("wallstreet dad")
+    searchbox.send_keys(keyword)
     searchbox.send_keys(Keys.RETURN)
     urls = []
     for i in range(20):
@@ -35,10 +36,14 @@ def scan_scam(driver):
         & (target_df.collection_name != "wallstreetdads")
     ]
     target_df["reported"] = False
-    old_list = pd.read_csv("report_log.csv")
-    target_df = target_df[~target_df.url.isin(list(old_list.url))]
-    target_df = pd.concat([old_list, target_df], axis=0)
-    return target_df
+    list_of_files = glob.glob("report_log.csv")
+    if len(list_of_files) > 0:
+        old_list = pd.read_csv("report_log.csv")
+        target_df = target_df[~target_df.url.isin(list(old_list.url))]
+        target_df = pd.concat([old_list, target_df], axis=0)
+    print("scan result")
+    print(target_df)
+    target_df.to_csv("report_log.csv", index=False)
 
 
 def find_input_box(driver, label, element):
@@ -75,9 +80,7 @@ def report_scam(driver, url):
     box_input(driver, label="Subject", text="Reporting bad players stealing our art and scamming our fans")
     time.sleep(1)
     option_select(driver, label="Type of report", option="Fraudulent activity")
-    box_input(
-        driver, label="URL to item/collection you wish to report", text="https://opensea.io/collection/wallstdadsnft"
-    )
+    box_input(driver, label="URL to item/collection you wish to report", text=url)
     box_input(
         driver,
         label="URL to legitimate asset or works, on or off OpenSea (proof of authorship)",
@@ -85,11 +88,13 @@ def report_scam(driver, url):
     )
     complaint = """
     We are www.wallstreetdads.com with over 70k members on our Discord and have NOT opened up our general sales minting yet and have NOT revealed our art.
-    The fraud collection took art from our website and discord and are trying to sell them.
+    The fraud collection ({}) took art from our website and discord and are trying to sell them.
     Official website: https://www.wallstreetdads.com
     Official collection: https://opensea.io/collection/wallstreetdads
     This collection is clearly a rip off of our art and try to scam our community. Please help taking them down.
-    """
+    """.format(
+        url
+    )
     driver.switch_to.frame(driver.find_element_by_id("request_description_ifr"))
     ## Insert text via xpath ##
     elem = driver.find_element_by_xpath("/html/body/p")
@@ -100,12 +105,17 @@ def report_scam(driver, url):
     time.sleep(5)
 
 
+keywords = ["wall street dad", "wallstreet dad"]
 driver1 = webdriver.Chrome()
 driver2 = webdriver.Chrome()
 while True:
     print(datetime.datetime.now())
-    target_df = scan_scam(driver1)
+    for kw in keywords:
+        scan_scam(driver1, keyword=kw)
+    target_df = pd.read_csv("report_log.csv")
     for url in list(target_df.url[target_df.reported == False]):
         report_scam(driver=driver2, url=url)
         target_df.reported[target_df.url == url] = True
+    print("processed")
+    print(target_df)
     target_df.to_csv("report_log.csv", index=False)
